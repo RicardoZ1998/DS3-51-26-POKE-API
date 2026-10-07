@@ -11,6 +11,7 @@ public class Battle {
     private final BattleListener battleListener;
     private Pokemon pokemonAtacante;
     private Pokemon pokemonDefensor;
+    private boolean combateTerminado;
 
     public Battle(Pokemon pokemonDelPrimerJugador, Pokemon pokemonDelSegundoJugador, BattleListener battleListener) {
         this.pokemonDelPrimerJugador = pokemonDelPrimerJugador;
@@ -21,6 +22,7 @@ public class Battle {
     // Elige quién empieza y deja el combate listo. No aplica ningún golpe todavía.
     // Devuelve el Pokémon que atacará primero.
     public Pokemon iniciarCombate() {
+        combateTerminado = false;
         pokemonAtacante = elegirPokemonQueInicia();
         pokemonDefensor = pokemonAtacante == pokemonDelPrimerJugador
                 ? pokemonDelSegundoJugador
@@ -31,8 +33,12 @@ public class Battle {
     // Aplica un solo golpe (el del Pokémon al que le toca) y pasa el turno al otro.
     // Si el defensor llega a 0 de vida, notifica al ganador.
     public void siguienteGolpe() {
+        if (combateTerminado) {
+            return;
+        }
         aplicarGolpe(pokemonAtacante, pokemonDefensor);
         if (pokemonDefensor.getCurrentHp() == 0) {
+            combateTerminado = true;
             battleListener.onBattleEnded(nombreParaMostrar(pokemonAtacante));
             return;
         }

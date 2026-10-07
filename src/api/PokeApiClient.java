@@ -5,6 +5,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -57,7 +59,16 @@ public class PokeApiClient {
         return buscarPokemonPorNombre(String.valueOf(id));
     }
 
-    public Pokemon crearPokemonDesdeJson (JSONObject json){
+    // Descarga el sprite del Pokémon. Devuelve null si no se pudo descargar (URL inválida, sin red, etc.).
+    public BufferedImage descargarSprite(Pokemon pokemon) {
+        try {
+            return ImageIO.read(URI.create(pokemon.getSpriteUrl()).toURL());
+        } catch (IOException | IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    private Pokemon crearPokemonDesdeJson(JSONObject json) {
         String type = json.getJSONArray("types")
                 .getJSONObject(0)
                 .getJSONObject("type")
@@ -94,15 +105,5 @@ public class PokeApiClient {
                 defense,
                 speed
         );
-    }
-
-    public static void main(String[] args) throws Exception {
-        PokeApiClient client = new PokeApiClient();
-
-        Pokemon pikachu = client.buscarPokemonPorNombre("pikachu");
-        System.out.println(pikachu.getName() + " | " + pikachu.getType() + " | HP " + pikachu.getCurrentHp());
-
-        Pokemon random = client.buscarPokemonAleatorio();
-        System.out.println(random.getName() + " | " + random.getType() + " | HP " + random.getCurrentHp());
     }
 }
