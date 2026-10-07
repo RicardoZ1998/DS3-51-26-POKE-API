@@ -333,7 +333,7 @@
             <constraints/>
             <properties>
               <editable value="false"/>
-              <font name="OCR-A BT" size="14" style="2"/>
+              <font name="OCR-A BT" size="10" style="0"/>
             </properties>
           </component>
         </children>

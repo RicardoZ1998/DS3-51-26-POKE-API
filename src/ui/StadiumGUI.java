@@ -211,8 +211,9 @@ public class StadiumGUI implements BattleListener {
         ranButton2.setEnabled(false);
         nextButton.setEnabled(true);
 
-        battleLog.append("--- " + p1.getName() + " vs " + p2.getName() + " ---\n");
-        battleLog.append("Empieza " + primero.getName() + ". Pulsa \"Siguiente\" para atacar.\n");
+        battleLog.setText("");
+        battleLog.append("--- " + batalla.nombreParaMostrar(p1) + " vs " + batalla.nombreParaMostrar(p2) + " ---\n");
+        battleLog.append("Empieza " + batalla.nombreParaMostrar(primero) + ". Pulsa \"Siguiente\" para atacar.\n");
     }
 
     @Override

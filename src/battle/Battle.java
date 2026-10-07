@@ -30,7 +30,7 @@ public class Battle {
     public void siguienteGolpe() {
         aplicarGolpe(pokemonAtacante, pokemonDefensor);
         if (pokemonDefensor.getCurrentHp() == 0) {
-            battleListener.onBattleEnded(pokemonAtacante.getName());
+            battleListener.onBattleEnded(nombreParaMostrar(pokemonAtacante));
             return;
         }
 
@@ -53,8 +53,19 @@ public class Battle {
         int dañoDelGolpe = calcularDañoDelGolpe(pokemonAtacante, pokemonDefensor);
 
         pokemonDefensor.recibirDaño(dañoDelGolpe);
-        battleListener.onTurn(pokemonAtacante.getName(), pokemonDefensor.getName(), dañoDelGolpe, false, 1.0);
-        battleListener.onHpChanged(pokemonDefensor.getName(), pokemonDefensor.getCurrentHp());
+        battleListener.onTurn(nombreParaMostrar(pokemonAtacante), nombreParaMostrar(pokemonDefensor), dañoDelGolpe, false, 1.0);
+        battleListener.onHpChanged(nombreParaMostrar(pokemonDefensor), pokemonDefensor.getCurrentHp());
+    }
+
+    // Nombre con la primera letra en mayúscula. Si los dos Pokémon se llaman igual,
+    // se añade 1 o 2 según el jugador ("Pikachu 1", "Pikachu 2") para poder diferenciarlos en el log.
+    public String nombreParaMostrar(Pokemon pokemon) {
+        String nombre = pokemon.getName();
+        nombre = nombre.substring(0, 1).toUpperCase() + nombre.substring(1);
+        if (pokemonDelPrimerJugador.getName().equals(pokemonDelSegundoJugador.getName())) {
+            nombre += pokemon == pokemonDelPrimerJugador ? " 1" : " 2";
+        }
+        return nombre;
     }
 
     // daño = ataque * aleatorio(0 a 1) - defensa * aleatorio(0 a 1)
