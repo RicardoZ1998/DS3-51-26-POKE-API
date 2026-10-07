@@ -169,6 +169,7 @@ public class StadiumGUI implements BattleListener {
                 }
                 catch (ExecutionException ex)
                 {
+                    limpiarPokemon(esPrimero);
                     Throwable causa = ex.getCause();
                     if (causa instanceof IOException)
                     {
@@ -185,6 +186,7 @@ public class StadiumGUI implements BattleListener {
                 }
                 catch (InterruptedException ex)
                 {
+                    limpiarPokemon(esPrimero);
                     mostrarError("La carga del Pokémon fue interrumpida.");
                 }
                 finally
@@ -219,6 +221,10 @@ public class StadiumGUI implements BattleListener {
     @Override
     public void onTurn(String attacker, String defender, int damage, boolean critical, double modifier)
     {
+        if (critical)
+        {
+            battleLog.append("¡Golpe crítico! (x" + modifier + ") ");
+        }
         battleLog.append(attacker + " atacó a " + defender + " e hizo " + damage + " de daño. ");
     }
 
@@ -249,6 +255,34 @@ public class StadiumGUI implements BattleListener {
         buscarButton2.setEnabled(true);
         ranButton2.setEnabled(true);
         actualizarBotonLuchar();
+    }
+
+    // Si la carga falla: descarta el Pokémon de ese lado y limpia sus campos.
+    // Al quedar p1/p2 en null, "Luchar" sigue deshabilitado hasta que se cargue uno válido.
+    private void limpiarPokemon(boolean esPrimero)
+    {
+        if (esPrimero)
+        {
+            p1 = null;
+            campoNombre.setText("");
+            campoHp.setText("");
+            campoAtaque.setText("");
+            campoDefensa.setText("");
+            campoVelocidad.setText("");
+            textoImagen.setIcon(null);
+            textoImagen.setText("Pokemon1");
+        }
+        else
+        {
+            p2 = null;
+            campoNombre2.setText("");
+            campoHp2.setText("");
+            campoAtaque2.setText("");
+            campoDefensa2.setText("");
+            campoVelocidad2.setText("");
+            textoImagen2.setIcon(null);
+            textoImagen2.setText("Pokemon2");
+        }
     }
 
     private void mostrarError(String mensaje)
