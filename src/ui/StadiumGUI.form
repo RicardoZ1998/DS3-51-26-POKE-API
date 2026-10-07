@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="ui.StadiumGUI">
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="15" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="30" left="30" bottom="30" right="30"/>
+    <constraints>
+      <xy x="20" y="20" width="500" height="874"/>
+    </constraints>
+    <properties>
+      <background color="-372146"/>
+      <enabled value="true"/>
+      <font name="OCR-A BT"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <component id="22f94" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" size="28" style="1"/>
+          <text value="STADIUM"/>
+        </properties>
+      </component>
+      <component id="52467" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="4" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" size="18" style="1"/>
+          <text value="ESTADÍSTICAS"/>
+        </properties>
+      </component>
+      <component id="e1e39" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="13" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" size="18" style="1"/>
+          <text value="HISTORIAL DE ATAQUES"/>
+        </properties>
+      </component>
+      <component id="86ed4" class="javax.swing.JTextArea" binding="campoAreaHabilidades">
+        <constraints>
+          <grid row="14" column="0" row-span="1" col-span="3" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="150" height="50"/>
+          </grid>
+        </constraints>
+        <properties/>
+      </component>
+      <component id="6c457" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="17"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT"/>
+          <text value="Nombre"/>
+        </properties>
+      </component>
+      <component id="5af1b" class="javax.swing.JLabel" binding="textoImagen">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="17"/>
+          </grid>
+        </constraints>
+        <properties>
+          <horizontalAlignment value="0"/>
+          <text value="Imagen"/>
+        </properties>
+      </component>
+      <component id="6e26f" class="javax.swing.JLabel" binding="textoImagen2">
+        <constraints>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Imagen2"/>
+        </properties>
+      </component>
+      <component id="3d933" class="javax.swing.JTextField" binding="campoNombre">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="34"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" style="0"/>
+        </properties>
+      </component>
+      <component id="6e786" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="17"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT"/>
+          <horizontalAlignment value="4"/>
+          <text value="Nombre"/>
+        </properties>
+      </component>
+      <component id="9e4d2" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="17"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT"/>
+          <text value="HP"/>
+        </properties>
+      </component>
+      <component id="bb88e" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="17"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT"/>
+          <text value="Ataque"/>
+        </properties>
+      </component>
+      <component id="677f2" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="17"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT"/>
+          <text value="Defensa"/>
+        </properties>
+      </component>
+      <component id="da731" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="17"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT"/>
+          <text value="Velocidad"/>
+        </properties>
+      </component>
+      <component id="80041" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="17"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT"/>
+          <horizontalAlignment value="4"/>
+          <text value="HP"/>
+        </properties>
+      </component>
+      <component id="eb107" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="17"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT"/>
+          <horizontalAlignment value="4"/>
+          <text value="Ataque"/>
+        </properties>
+      </component>
+      <component id="66ed7" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="9" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="17"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT"/>
+          <horizontalAlignment value="4"/>
+          <text value="Defensa"/>
+        </properties>
+      </component>
+      <component id="1a523" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="11" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="17"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT"/>
+          <horizontalAlignment value="4"/>
+          <text value="Velocidad"/>
+        </properties>
+      </component>
+      <component id="b9280" class="javax.swing.JTextField" binding="campoHp">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="34"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" style="0"/>
+        </properties>
+      </component>
+      <component id="d7d8e" class="javax.swing.JTextField" binding="campoNombre2">
+        <constraints>
+          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="34"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" style="0"/>
+          <horizontalAlignment value="4"/>
+        </properties>
+      </component>
+      <component id="c5704" class="javax.swing.JTextField" binding="campoAtaque">
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="34"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" style="0"/>
+        </properties>
+      </component>
+      <component id="18215" class="javax.swing.JTextField" binding="campoDefensa">
+        <constraints>
+          <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="34"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" style="0"/>
+        </properties>
+      </component>
+      <component id="526c2" class="javax.swing.JTextField" binding="campoVelocidad">
+        <constraints>
+          <grid row="12" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="34"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" style="0"/>
+        </properties>
+      </component>
+      <component id="602f0" class="javax.swing.JTextField" binding="campoHp2">
+        <constraints>
+          <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="34"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" style="0"/>
+          <horizontalAlignment value="4"/>
+        </properties>
+      </component>
+      <component id="86ed9" class="javax.swing.JTextField" binding="campoAtaque2">
+        <constraints>
+          <grid row="8" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="34"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" style="0"/>
+          <horizontalAlignment value="4"/>
+        </properties>
+      </component>
+      <component id="3999e" class="javax.swing.JTextField" binding="campoDefensa2">
+        <constraints>
+          <grid row="10" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="34"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" style="0"/>
+          <horizontalAlignment value="4"/>
+        </properties>
+      </component>
+      <component id="61c3e" class="javax.swing.JTextField" binding="campoVelocidad2">
+        <constraints>
+          <grid row="12" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+            <preferred-size width="201" height="34"/>
+          </grid>
+        </constraints>
+        <properties>
+          <font name="OCR-A BT" style="0"/>
+          <horizontalAlignment value="4"/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>
