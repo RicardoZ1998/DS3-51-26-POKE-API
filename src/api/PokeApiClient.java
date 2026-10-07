@@ -2,6 +2,7 @@ package api;
 
 import model.Pokemon;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -15,20 +16,40 @@ public class PokeApiClient {
     private final HttpClient client = HttpClient.newHttpClient();
 
     public Pokemon buscarPokemonPorNombre(String nombre) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(URL + nombre.trim().toLowerCase()))
-                .build();
+        String nombreLimpio = nombre == null ? "" : nombre.trim().toLowerCase();
+        if (nombreLimpio.isEmpty()) {
+            throw new IOException("Escribe el nombre de un Pokémon antes de buscar.");
+        }
 
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpRequest request;
+        try {
+            request = HttpRequest.newBuilder()
+                    .uri(URI.create(URL + nombreLimpio))
+                    .build();
+        } catch (IllegalArgumentException ex) {
+            throw new IOException("El nombre \"" + nombreLimpio + "\" contiene caracteres no válidos.", ex);
+        }
 
-        if (response.statusCode() == 400){
-            throw new IOException("Pokémon no encontrado");
+        HttpResponse<String> response;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException ex) {
+            throw new IOException("Error de red: no se pudo conectar con PokeAPI. Revisa tu conexión a internet.", ex);
+        }
+
+        if (response.statusCode() == 404) {
+            throw new IOException("Pokémon no encontrado: \"" + nombreLimpio + "\"");
         }
 
         if (response.statusCode() != 200) {
-            throw new IOException("Error de red");
+            throw new IOException("Error de red: PokeAPI respondió con el código " + response.statusCode() + ".");
         }
-        return crearPokemonDesdeJson(new JSONObject(response.body()));
+
+        try {
+            return crearPokemonDesdeJson(new JSONObject(response.body()));
+        } catch (JSONException ex) {
+            throw new IOException("La respuesta de PokeAPI no tiene el formato esperado.", ex);
+        }
     }
 
     public Pokemon buscarPokemonAleatorio() throws IOException, InterruptedException {

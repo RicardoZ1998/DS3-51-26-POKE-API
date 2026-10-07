@@ -46,7 +46,7 @@ public class Battle {
         int dañoDelGolpe = calcularDañoDelGolpe(pokemonAtacante, pokemonDefensor);
 
         pokemonDefensor.recibirDaño(dañoDelGolpe);
-        battleListener.onTurn(pokemonAtacante.getName(), pokemonDefensor.getName(), dañoDelGolpe);
+        battleListener.onTurn(pokemonAtacante.getName(), pokemonDefensor.getName(), dañoDelGolpe, false, 1.0);
         battleListener.onHpChanged(pokemonDefensor.getName(), pokemonDefensor.getCurrentHp());
     }
 

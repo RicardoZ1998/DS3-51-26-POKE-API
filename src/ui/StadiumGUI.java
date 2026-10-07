@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 public class StadiumGUI {
     private Pokemon p1;
@@ -35,48 +36,27 @@ public class StadiumGUI {
     private JButton ranButton1;
     private JButton ranButton2;
     private JTextArea battleLog;
+    private JButton figthButton;
+    private JButton nextButton;
+    private int cargasEnCurso = 0;
 
     public StadiumGUI()
     {
+        figthButton.setEnabled(false);
+
         buscarButton1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                PokeApiClient ap = new PokeApiClient();
                 String nombrePokemon = campoNombre.getText();
-                try
-                {
-                    p1 = ap.buscarPokemonPorNombre(nombrePokemon);
-                    rellenarCampos(p1, campoNombre, campoHp, campoAtaque, campoDefensa, campoVelocidad, textoImagen);
-                }
-                catch (IOException ex)
-                {
-                    throw new RuntimeException(ex);
-                }
-                catch (InterruptedException ex)
-                {
-                    throw new RuntimeException(ex);
-                }
+                cargarPokemon(true, () -> new PokeApiClient().buscarPokemonPorNombre(nombrePokemon));
             }
         });
         ranButton1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                PokeApiClient ap = new PokeApiClient();
-                try
-                {
-                    p1 = ap.buscarPokemonAleatorio();
-                    rellenarCampos(p1, campoNombre, campoHp, campoAtaque, campoDefensa, campoVelocidad, textoImagen);
-                }
-                catch (IOException ex)
-                {
-                    throw new RuntimeException(ex);
-                }
-                catch (InterruptedException ex)
-                {
-                    throw new RuntimeException(ex);
-                }
+                cargarPokemon(true, () -> new PokeApiClient().buscarPokemonAleatorio());
             }
         });
 
@@ -85,46 +65,131 @@ public class StadiumGUI {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                PokeApiClient ap = new PokeApiClient();
                 String nombrePokemon = campoNombre2.getText();
-                try
-                {
-                    p2 = ap.buscarPokemonPorNombre(nombrePokemon);
-                    rellenarCampos(p2, campoNombre2, campoHp2, campoAtaque2, campoDefensa2, campoVelocidad2, textoImagen2);
-                }
-                catch (IOException ex)
-                {
-                    throw new RuntimeException(ex);
-                }
-                catch (InterruptedException ex)
-                {
-                    throw new RuntimeException(ex);
-                }
+                cargarPokemon(false, () -> new PokeApiClient().buscarPokemonPorNombre(nombrePokemon));
             }
         });
         ranButton2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                PokeApiClient ap = new PokeApiClient();
-                try
-                {
-                    p2 = ap.buscarPokemonAleatorio();
-                    rellenarCampos(p2, campoNombre2, campoHp2, campoAtaque2, campoDefensa2, campoVelocidad2, textoImagen2);
-                }
-                catch (IOException ex)
-                {
-                    throw new RuntimeException(ex);
-                }
-                catch (InterruptedException ex)
-                {
-                    throw new RuntimeException(ex);
-                }
+                cargarPokemon(false, () -> new PokeApiClient().buscarPokemonAleatorio());
             }
         });
     }
 
 
+
+    private interface BusquedaPokemon
+    {
+        Pokemon buscar() throws IOException, InterruptedException;
+    }
+
+    private static class PokemonCargado
+    {
+        final Pokemon pokemon;
+        final ImageIcon sprite; // null si no se pudo descargar la imagen
+
+        PokemonCargado(Pokemon pokemon, ImageIcon sprite)
+        {
+            this.pokemon = pokemon;
+            this.sprite = sprite;
+        }
+    }
+
+    // Carga un Pokémon (datos + sprite) en un hilo de fondo para no bloquear la UI.
+    // esPrimero: true = jugador 1, false = jugador 2. Todo lo que toca Swing ocurre en el EDT.
+    private void cargarPokemon(boolean esPrimero, BusquedaPokemon busqueda)
+    {
+        JButton botonBuscar = esPrimero ? buscarButton1 : buscarButton2;
+        JButton botonAleatorio = esPrimero ? ranButton1 : ranButton2;
+
+        botonBuscar.setEnabled(false);
+        botonAleatorio.setEnabled(false);
+        cargasEnCurso++;
+        actualizarBotonLuchar();
+
+        new SwingWorker<PokemonCargado, Void>() {
+            @Override
+            protected PokemonCargado doInBackground() throws Exception
+            {
+                Pokemon pokemon = busqueda.buscar();
+
+                ImageIcon sprite = null;
+                try
+                {
+                    ImageIcon icon = new ImageIcon(new java.net.URL(pokemon.getSpriteUrl()));
+                    if (icon.getImageLoadStatus() == MediaTracker.COMPLETE)
+                    {
+                        sprite = icon;
+                    }
+                }
+                catch (java.net.MalformedURLException ex)
+                {
+                    // sprite queda en null y se avisa en done()
+                }
+                return new PokemonCargado(pokemon, sprite);
+            }
+
+            @Override
+            protected void done()
+            {
+                try
+                {
+                    PokemonCargado cargado = get();
+                    if (esPrimero)
+                    {
+                        p1 = cargado.pokemon;
+                        rellenarCampos(p1, campoNombre, campoHp, campoAtaque, campoDefensa, campoVelocidad, textoImagen, cargado.sprite);
+                    }
+                    else
+                    {
+                        p2 = cargado.pokemon;
+                        rellenarCampos(p2, campoNombre2, campoHp2, campoAtaque2, campoDefensa2, campoVelocidad2, textoImagen2, cargado.sprite);
+                    }
+                }
+                catch (ExecutionException ex)
+                {
+                    Throwable causa = ex.getCause();
+                    if (causa instanceof IOException)
+                    {
+                        mostrarError(causa.getMessage());
+                    }
+                    else if (causa instanceof InterruptedException)
+                    {
+                        mostrarError("La carga del Pokémon fue interrumpida.");
+                    }
+                    else
+                    {
+                        mostrarError("Error inesperado al cargar el Pokémon: " + causa);
+                    }
+                }
+                catch (InterruptedException ex)
+                {
+                    mostrarError("La carga del Pokémon fue interrumpida.");
+                }
+                finally
+                {
+                    botonBuscar.setEnabled(true);
+                    botonAleatorio.setEnabled(true);
+                    cargasEnCurso--;
+                    actualizarBotonLuchar();
+                }
+            }
+        }.execute();
+    }
+
+    private void mostrarError(String mensaje)
+    {
+        JOptionPane.showMessageDialog(mainPanel, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    // "Luchar" solo se habilita cuando ambos Pokémon están cargados y no hay ninguna carga en curso.
+    // p1/p2 solo se asignan si la carga terminó bien, así que null = no cargado.
+    private void actualizarBotonLuchar()
+    {
+        figthButton.setEnabled(p1 != null && p2 != null && cargasEnCurso == 0);
+    }
 
     public void rellenarCampos(Pokemon p,
                                JTextField campoNombre,
@@ -132,7 +197,8 @@ public class StadiumGUI {
                                JTextField campoAtaque,
                                JTextField campoDefensa,
                                JTextField campoVelocidad,
-                               JLabel textoImagen)
+                               JLabel textoImagen,
+                               ImageIcon sprite)
     {
         campoNombre.setText(String.valueOf(p.getName()));
         campoHp.setText(String.valueOf(p.getMaxHp()));
@@ -140,20 +206,16 @@ public class StadiumGUI {
         campoDefensa.setText(String.valueOf(p.getDefense()));
         campoVelocidad.setText(String.valueOf(p.getSpeed()));
 
-        try
+        if (sprite != null)
         {
-            java.net.URL urlImage = new java.net.URL(String.valueOf(p.getSpriteUrl()));
-            ImageIcon icon = new ImageIcon(urlImage);
-
-            //Se puede guardar la imagen para darle sus propias propiedades
-            Image image = icon.getImage().getScaledInstance(200, 200, Image.SCALE_DEFAULT);
             textoImagen.setText("");
-            textoImagen.setIcon(new ImageIcon(urlImage));
+            textoImagen.setIcon(sprite);
         }
-        catch (Exception e)
+        else
         {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(null, String.format("Error al cargar la imagen de %s", p.getName()));
+            textoImagen.setIcon(null);
+            textoImagen.setText("Sin imagen");
+            mostrarError(String.format("Error al cargar la imagen de %s", p.getName()));
         }
     }
 
