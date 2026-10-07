@@ -1,6 +1,8 @@
 package ui;
 
 import api.PokeApiClient;
+import battle.Battle;
+import battle.BattleListener;
 import model.Pokemon;
 
 import javax.swing.*;
@@ -10,9 +12,10 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
-public class StadiumGUI {
+public class StadiumGUI implements BattleListener {
     private Pokemon p1;
     private Pokemon p2;
+    private Battle batalla;
     private JPanel mainPanel;
     private JTextField campoId;
     private JTextField campoNombre;
@@ -43,6 +46,22 @@ public class StadiumGUI {
     public StadiumGUI()
     {
         figthButton.setEnabled(false);
+        nextButton.setEnabled(false);
+
+        figthButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                iniciarBatalla();
+            }
+        });
+        nextButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                batalla.siguienteGolpe();
+            }
+        });
 
         buscarButton1.addActionListener(new ActionListener() {
             @Override
@@ -177,6 +196,58 @@ public class StadiumGUI {
                 }
             }
         }.execute();
+    }
+
+    // Prepara el combate: bloquea los botones de carga y habilita "Siguiente".
+    private void iniciarBatalla()
+    {
+        batalla = new Battle(p1, p2, this);
+        Pokemon primero = batalla.iniciarCombate();
+
+        figthButton.setEnabled(false);
+        buscarButton1.setEnabled(false);
+        ranButton1.setEnabled(false);
+        buscarButton2.setEnabled(false);
+        ranButton2.setEnabled(false);
+        nextButton.setEnabled(true);
+
+        battleLog.append("--- " + p1.getName() + " vs " + p2.getName() + " ---\n");
+        battleLog.append("Empieza " + primero.getName() + ". Pulsa \"Siguiente\" para atacar.\n");
+    }
+
+    @Override
+    public void onTurn(String attacker, String defender, int damage, boolean critical, double modifier)
+    {
+        battleLog.append(attacker + " atacó a " + defender + " e hizo " + damage + " de daño. ");
+    }
+
+    // Actualiza el campo HP de ambos con la vida actual (así funciona aunque los dos tengan el mismo nombre).
+    @Override
+    public void onHpChanged(String pokemon, int hpActual)
+    {
+        campoHp.setText(String.valueOf(p1.getCurrentHp()));
+        campoHp2.setText(String.valueOf(p2.getCurrentHp()));
+        battleLog.append("A " + pokemon + " le quedan " + hpActual + " HP.\n");
+    }
+
+    @Override
+    public void onBattleEnded(String winner)
+    {
+        battleLog.append("¡" + winner + " ganó el combate!\n");
+        JOptionPane.showMessageDialog(mainPanel, "¡" + winner + " ganó el combate!", "Fin del combate", JOptionPane.INFORMATION_MESSAGE);
+
+        // Restablece la vida de ambos y deja la interfaz lista para otra pelea
+        p1.reiniciarHp();
+        p2.reiniciarHp();
+        campoHp.setText(String.valueOf(p1.getMaxHp()));
+        campoHp2.setText(String.valueOf(p2.getMaxHp()));
+
+        nextButton.setEnabled(false);
+        buscarButton1.setEnabled(true);
+        ranButton1.setEnabled(true);
+        buscarButton2.setEnabled(true);
+        ranButton2.setEnabled(true);
+        actualizarBotonLuchar();
     }
 
     private void mostrarError(String mensaje)
