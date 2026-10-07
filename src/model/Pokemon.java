@@ -29,6 +29,10 @@ public class Pokemon {
         }
     }
 
+    public void reiniciarHp() {
+        currentHp = maxHp;
+    }
+
     public String getName() {
         return name;
     }

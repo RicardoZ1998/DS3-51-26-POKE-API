@@ -6,6 +6,8 @@ public class Battle {
     private final Pokemon pokemonDelPrimerJugador;
     private final Pokemon pokemonDelSegundoJugador;
     private final BattleListener battleListener;
+    private Pokemon pokemonAtacante;
+    private Pokemon pokemonDefensor;
 
     public Battle(Pokemon pokemonDelPrimerJugador, Pokemon pokemonDelSegundoJugador, BattleListener battleListener) {
         this.pokemonDelPrimerJugador = pokemonDelPrimerJugador;
@@ -13,23 +15,28 @@ public class Battle {
         this.battleListener = battleListener;
     }
 
-    public void iniciarCombate() {
-        Pokemon pokemonAtacante = elegirPokemonQueInicia();
-        Pokemon pokemonDefensor = pokemonAtacante == pokemonDelPrimerJugador
+    // Elige quién empieza y deja el combate listo. No aplica ningún golpe todavía.
+    // Devuelve el Pokémon que atacará primero.
+    public Pokemon iniciarCombate() {
+        pokemonAtacante = elegirPokemonQueInicia();
+        pokemonDefensor = pokemonAtacante == pokemonDelPrimerJugador
                 ? pokemonDelSegundoJugador
                 : pokemonDelPrimerJugador;
+        return pokemonAtacante;
+    }
 
-        while (pokemonAtacante.getCurrentHp() > 0 && pokemonDefensor.getCurrentHp() > 0) {
-            aplicarGolpe(pokemonAtacante, pokemonDefensor);
-            if (pokemonDefensor.getCurrentHp() == 0) {
-                battleListener.onBattleEnded(pokemonAtacante.getName());
-                return;
-            }
-
-            Pokemon pokemonAtacanteAnterior = pokemonAtacante;
-            pokemonAtacante = pokemonDefensor;
-            pokemonDefensor = pokemonAtacanteAnterior;
+    // Aplica un solo golpe (el del Pokémon al que le toca) y pasa el turno al otro.
+    // Si el defensor llega a 0 de vida, notifica al ganador.
+    public void siguienteGolpe() {
+        aplicarGolpe(pokemonAtacante, pokemonDefensor);
+        if (pokemonDefensor.getCurrentHp() == 0) {
+            battleListener.onBattleEnded(nombreParaMostrar(pokemonAtacante));
+            return;
         }
+
+        Pokemon pokemonAtacanteAnterior = pokemonAtacante;
+        pokemonAtacante = pokemonDefensor;
+        pokemonDefensor = pokemonAtacanteAnterior;
     }
 
     private Pokemon elegirPokemonQueInicia() {
@@ -46,8 +53,19 @@ public class Battle {
         int dañoDelGolpe = calcularDañoDelGolpe(pokemonAtacante, pokemonDefensor);
 
         pokemonDefensor.recibirDaño(dañoDelGolpe);
-        battleListener.onTurn(pokemonAtacante.getName(), pokemonDefensor.getName(), dañoDelGolpe);
-        battleListener.onHpChanged(pokemonDefensor.getName(), pokemonDefensor.getCurrentHp());
+        battleListener.onTurn(nombreParaMostrar(pokemonAtacante), nombreParaMostrar(pokemonDefensor), dañoDelGolpe, false, 1.0);
+        battleListener.onHpChanged(nombreParaMostrar(pokemonDefensor), pokemonDefensor.getCurrentHp());
+    }
+
+    // Nombre con la primera letra en mayúscula. Si los dos Pokémon se llaman igual,
+    // se añade 1 o 2 según el jugador ("Pikachu 1", "Pikachu 2") para poder diferenciarlos en el log.
+    public String nombreParaMostrar(Pokemon pokemon) {
+        String nombre = pokemon.getName();
+        nombre = nombre.substring(0, 1).toUpperCase() + nombre.substring(1);
+        if (pokemonDelPrimerJugador.getName().equals(pokemonDelSegundoJugador.getName())) {
+            nombre += pokemon == pokemonDelPrimerJugador ? " 1" : " 2";
+        }
+        return nombre;
     }
 
     // daño = ataque * aleatorio(0 a 1) - defensa * aleatorio(0 a 1)
