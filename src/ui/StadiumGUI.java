@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
@@ -17,15 +18,10 @@ public class StadiumGUI implements BattleListener {
     private Pokemon p2;
     private Battle batalla;
     private JPanel mainPanel;
-    private JTextField campoId;
     private JTextField campoNombre;
-    private JTextField campoPeso;
-    private JTextField campoAltura;
     private JTextField campoHp;
     private JTextField campoAtaque;
     private JTextField campoDefensa;
-    private JTextField campoAtaqEspecial;
-    private JTextField campoDefEspecial;
     private JTextField campoVelocidad;
     private JLabel textoImagen;
     private JLabel textoImagen2;
@@ -42,6 +38,7 @@ public class StadiumGUI implements BattleListener {
     private JButton figthButton;
     private JButton nextButton;
     private int cargasEnCurso = 0;
+    private final PokeApiClient apiClient = new PokeApiClient();
 
     public StadiumGUI()
     {
@@ -68,14 +65,14 @@ public class StadiumGUI implements BattleListener {
             public void actionPerformed(ActionEvent e)
             {
                 String nombrePokemon = campoNombre.getText();
-                cargarPokemon(true, () -> new PokeApiClient().buscarPokemonPorNombre(nombrePokemon));
+                cargarPokemon(true, () -> apiClient.buscarPokemonPorNombre(nombrePokemon));
             }
         });
         ranButton1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                cargarPokemon(true, () -> new PokeApiClient().buscarPokemonAleatorio());
+                cargarPokemon(true, () -> apiClient.buscarPokemonAleatorio());
             }
         });
 
@@ -85,14 +82,14 @@ public class StadiumGUI implements BattleListener {
             public void actionPerformed(ActionEvent e)
             {
                 String nombrePokemon = campoNombre2.getText();
-                cargarPokemon(false, () -> new PokeApiClient().buscarPokemonPorNombre(nombrePokemon));
+                cargarPokemon(false, () -> apiClient.buscarPokemonPorNombre(nombrePokemon));
             }
         });
         ranButton2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                cargarPokemon(false, () -> new PokeApiClient().buscarPokemonAleatorio());
+                cargarPokemon(false, () -> apiClient.buscarPokemonAleatorio());
             }
         });
     }
@@ -134,19 +131,9 @@ public class StadiumGUI implements BattleListener {
             {
                 Pokemon pokemon = busqueda.buscar();
 
-                ImageIcon sprite = null;
-                try
-                {
-                    ImageIcon icon = new ImageIcon(new java.net.URL(pokemon.getSpriteUrl()));
-                    if (icon.getImageLoadStatus() == MediaTracker.COMPLETE)
-                    {
-                        sprite = icon;
-                    }
-                }
-                catch (java.net.MalformedURLException ex)
-                {
-                    // sprite queda en null y se avisa en done()
-                }
+                // sprite queda en null si no se pudo descargar y se avisa en done()
+                BufferedImage imagen = apiClient.descargarSprite(pokemon);
+                ImageIcon sprite = imagen == null ? null : new ImageIcon(imagen);
                 return new PokemonCargado(pokemon, sprite);
             }
 
@@ -169,6 +156,7 @@ public class StadiumGUI implements BattleListener {
                 }
                 catch (ExecutionException ex)
                 {
+                    limpiarPokemon(esPrimero);
                     Throwable causa = ex.getCause();
                     if (causa instanceof IOException)
                     {
@@ -185,6 +173,7 @@ public class StadiumGUI implements BattleListener {
                 }
                 catch (InterruptedException ex)
                 {
+                    limpiarPokemon(esPrimero);
                     mostrarError("La carga del Pokémon fue interrumpida.");
                 }
                 finally
@@ -219,6 +208,10 @@ public class StadiumGUI implements BattleListener {
     @Override
     public void onTurn(String attacker, String defender, int damage, boolean critical, double modifier)
     {
+        if (critical)
+        {
+            battleLog.append("¡Golpe crítico! (x" + modifier + ") ");
+        }
         battleLog.append(attacker + " atacó a " + defender + " e hizo " + damage + " de daño. ");
     }
 
@@ -249,6 +242,34 @@ public class StadiumGUI implements BattleListener {
         buscarButton2.setEnabled(true);
         ranButton2.setEnabled(true);
         actualizarBotonLuchar();
+    }
+
+    // Si la carga falla: descarta el Pokémon de ese lado y limpia sus campos.
+    // Al quedar p1/p2 en null, "Luchar" sigue deshabilitado hasta que se cargue uno válido.
+    private void limpiarPokemon(boolean esPrimero)
+    {
+        if (esPrimero)
+        {
+            p1 = null;
+            campoNombre.setText("");
+            campoHp.setText("");
+            campoAtaque.setText("");
+            campoDefensa.setText("");
+            campoVelocidad.setText("");
+            textoImagen.setIcon(null);
+            textoImagen.setText("Pokemon1");
+        }
+        else
+        {
+            p2 = null;
+            campoNombre2.setText("");
+            campoHp2.setText("");
+            campoAtaque2.setText("");
+            campoDefensa2.setText("");
+            campoVelocidad2.setText("");
+            textoImagen2.setIcon(null);
+            textoImagen2.setText("Pokemon2");
+        }
     }
 
     private void mostrarError(String mensaje)
@@ -310,7 +331,7 @@ public class StadiumGUI implements BattleListener {
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        frame.setSize(600, 700);
+        frame.setSize(900, 600);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
 

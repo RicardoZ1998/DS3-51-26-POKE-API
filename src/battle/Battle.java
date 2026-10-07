@@ -5,9 +5,13 @@ import model.Pokemon;
 public class Battle {
     private final Pokemon pokemonDelPrimerJugador;
     private final Pokemon pokemonDelSegundoJugador;
+    private static final double PROBABILIDAD_CRITICO = 0.0417; // 4.17 %
+    private static final double MULTIPLICADOR_CRITICO = 1.5;
+
     private final BattleListener battleListener;
     private Pokemon pokemonAtacante;
     private Pokemon pokemonDefensor;
+    private boolean combateTerminado;
 
     public Battle(Pokemon pokemonDelPrimerJugador, Pokemon pokemonDelSegundoJugador, BattleListener battleListener) {
         this.pokemonDelPrimerJugador = pokemonDelPrimerJugador;
@@ -18,6 +22,7 @@ public class Battle {
     // Elige quién empieza y deja el combate listo. No aplica ningún golpe todavía.
     // Devuelve el Pokémon que atacará primero.
     public Pokemon iniciarCombate() {
+        combateTerminado = false;
         pokemonAtacante = elegirPokemonQueInicia();
         pokemonDefensor = pokemonAtacante == pokemonDelPrimerJugador
                 ? pokemonDelSegundoJugador
@@ -28,8 +33,12 @@ public class Battle {
     // Aplica un solo golpe (el del Pokémon al que le toca) y pasa el turno al otro.
     // Si el defensor llega a 0 de vida, notifica al ganador.
     public void siguienteGolpe() {
+        if (combateTerminado) {
+            return;
+        }
         aplicarGolpe(pokemonAtacante, pokemonDefensor);
         if (pokemonDefensor.getCurrentHp() == 0) {
+            combateTerminado = true;
             battleListener.onBattleEnded(nombreParaMostrar(pokemonAtacante));
             return;
         }
@@ -50,10 +59,12 @@ public class Battle {
     }
 
     private void aplicarGolpe(Pokemon pokemonAtacante, Pokemon pokemonDefensor) {
-        int dañoDelGolpe = calcularDañoDelGolpe(pokemonAtacante, pokemonDefensor);
+        boolean esCritico = Math.random() < PROBABILIDAD_CRITICO;
+        double modificador = esCritico ? MULTIPLICADOR_CRITICO : 1.0;
+        int dañoDelGolpe = calcularDañoDelGolpe(pokemonAtacante, pokemonDefensor, modificador);
 
         pokemonDefensor.recibirDaño(dañoDelGolpe);
-        battleListener.onTurn(nombreParaMostrar(pokemonAtacante), nombreParaMostrar(pokemonDefensor), dañoDelGolpe, false, 1.0);
+        battleListener.onTurn(nombreParaMostrar(pokemonAtacante), nombreParaMostrar(pokemonDefensor), dañoDelGolpe, esCritico, modificador);
         battleListener.onHpChanged(nombreParaMostrar(pokemonDefensor), pokemonDefensor.getCurrentHp());
     }
 
@@ -68,10 +79,11 @@ public class Battle {
         return nombre;
     }
 
-    // daño = ataque * aleatorio(0 a 1) - defensa * aleatorio(0 a 1)
+    // daño = ataque * modificador * aleatorio(0 a 1) - defensa * aleatorio(0 a 1)
+    // El modificador es 1.5 si el golpe es crítico y 1.0 si no.
     // Si el resultado es menor que 1, el golpe hace 1. La vida no baja de 0: lo hace recibirDaño
-    private int calcularDañoDelGolpe(Pokemon pokemonAtacante, Pokemon pokemonDefensor) {
-        double dañoBase = pokemonAtacante.getAttack() * Math.random()
+    private int calcularDañoDelGolpe(Pokemon pokemonAtacante, Pokemon pokemonDefensor, double modificador) {
+        double dañoBase = pokemonAtacante.getAttack() * modificador * Math.random()
                 - pokemonDefensor.getDefense() * Math.random();
         int dañoDelGolpe = (int) Math.round(dañoBase);
         if (dañoDelGolpe < 1) {

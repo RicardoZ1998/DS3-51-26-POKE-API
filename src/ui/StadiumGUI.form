@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="ui.StadiumGUI">
-  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="17" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-    <margin top="30" left="30" bottom="30" right="30"/>
+  <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="14" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="10" left="10" bottom="10" right="10"/>
     <constraints>
-      <xy x="20" y="20" width="496" height="874"/>
+      <xy x="20" y="20" width="756" height="874"/>
     </constraints>
     <properties>
       <background color="-372146"/>
@@ -14,7 +14,7 @@
     <children>
       <component id="22f94" class="javax.swing.JLabel">
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="0" row-span="1" col-span="6" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <font name="OCR-A BT" size="28" style="1"/>
@@ -28,15 +28,6 @@
         <properties>
           <font name="OCR-A BT" size="18" style="1"/>
           <text value="ESTADÍSTICAS"/>
-        </properties>
-      </component>
-      <component id="e1e39" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="14" column="0" row-span="1" col-span="5" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <font name="OCR-A BT" size="18" style="1"/>
-          <text value="HISTORIAL DE ATAQUES"/>
         </properties>
       </component>
       <component id="6c457" class="javax.swing.JLabel">
@@ -76,7 +67,7 @@
           </grid>
         </constraints>
         <properties>
-          <font name="OCR-A BT" style="0"/>
+          <font name="OCR-A BT" size="18" style="0"/>
         </properties>
       </component>
       <component id="6e786" class="javax.swing.JLabel">
@@ -191,7 +182,7 @@
         </constraints>
         <properties>
           <editable value="false"/>
-          <font name="OCR-A BT" style="0"/>
+          <font name="OCR-A BT" size="18" style="0"/>
         </properties>
       </component>
       <component id="d7d8e" class="javax.swing.JTextField" binding="campoNombre2">
@@ -201,7 +192,7 @@
           </grid>
         </constraints>
         <properties>
-          <font name="OCR-A BT" style="0"/>
+          <font name="OCR-A BT" size="18" style="0"/>
           <horizontalAlignment value="4"/>
         </properties>
       </component>
@@ -213,7 +204,7 @@
         </constraints>
         <properties>
           <editable value="false"/>
-          <font name="OCR-A BT" style="0"/>
+          <font name="OCR-A BT" size="18" style="0"/>
         </properties>
       </component>
       <component id="18215" class="javax.swing.JTextField" binding="campoDefensa">
@@ -224,7 +215,7 @@
         </constraints>
         <properties>
           <editable value="false"/>
-          <font name="OCR-A BT" style="0"/>
+          <font name="OCR-A BT" size="18" style="0"/>
         </properties>
       </component>
       <component id="526c2" class="javax.swing.JTextField" binding="campoVelocidad">
@@ -235,7 +226,7 @@
         </constraints>
         <properties>
           <editable value="false"/>
-          <font name="OCR-A BT" style="0"/>
+          <font name="OCR-A BT" size="18" style="0"/>
         </properties>
       </component>
       <component id="602f0" class="javax.swing.JTextField" binding="campoHp2">
@@ -246,7 +237,7 @@
         </constraints>
         <properties>
           <editable value="false"/>
-          <font name="OCR-A BT" style="0"/>
+          <font name="OCR-A BT" size="18" style="0"/>
           <horizontalAlignment value="4"/>
         </properties>
       </component>
@@ -258,7 +249,7 @@
         </constraints>
         <properties>
           <editable value="false"/>
-          <font name="OCR-A BT" style="0"/>
+          <font name="OCR-A BT" size="18" style="0"/>
           <horizontalAlignment value="4"/>
         </properties>
       </component>
@@ -270,7 +261,7 @@
         </constraints>
         <properties>
           <editable value="false"/>
-          <font name="OCR-A BT" style="0"/>
+          <font name="OCR-A BT" size="18" style="0"/>
           <horizontalAlignment value="4"/>
         </properties>
       </component>
@@ -282,7 +273,7 @@
         </constraints>
         <properties>
           <editable value="false"/>
-          <font name="OCR-A BT" style="0"/>
+          <font name="OCR-A BT" size="18" style="0"/>
           <horizontalAlignment value="4"/>
         </properties>
       </component>
@@ -291,7 +282,9 @@
           <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <background color="-2476491"/>
           <font name="OCR-A BT"/>
+          <foreground color="-1"/>
           <text value="Buscar"/>
         </properties>
       </component>
@@ -300,6 +293,7 @@
           <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <background color="-354433"/>
           <font name="OCR-A BT"/>
           <text value="Aleatorio"/>
         </properties>
@@ -309,7 +303,9 @@
           <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <background color="-2476491"/>
           <font name="OCR-A BT"/>
+          <foreground color="-1"/>
           <text value="Buscar"/>
         </properties>
       </component>
@@ -318,42 +314,59 @@
           <grid row="4" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <background color="-354433"/>
           <font name="OCR-A BT"/>
           <text value="Aleatorio"/>
         </properties>
       </component>
-      <scrollpane id="922ef">
+      <scrollpane id="28185">
         <constraints>
-          <grid row="15" column="1" row-span="2" col-span="3" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="3" column="5" row-span="9" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none"/>
         <children>
-          <component id="af401" class="javax.swing.JTextArea" binding="battleLog">
+          <component id="c4986" class="javax.swing.JTextArea" binding="battleLog">
             <constraints/>
             <properties>
               <editable value="false"/>
-              <font name="OCR-A BT" size="10" style="0"/>
+              <font name="OCR-A BT" size="16" style="2"/>
+              <lineWrap value="false"/>
+              <opaque value="false"/>
+              <wrapStyleWord value="false"/>
             </properties>
           </component>
         </children>
       </scrollpane>
-      <component id="2d482" class="javax.swing.JButton" binding="figthButton">
+      <component id="e90de" class="javax.swing.JLabel">
         <constraints>
-          <grid row="15" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <font name="OCR-A BT"/>
-          <text value="Luchar"/>
+          <font name="OCR-A BT" size="18" style="1"/>
+          <text value="HISTORIAL DE ATAQUES"/>
         </properties>
       </component>
-      <component id="3c524" class="javax.swing.JButton" binding="nextButton">
+      <component id="e9d5" class="javax.swing.JButton" binding="nextButton">
         <constraints>
-          <grid row="16" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="13" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <background color="-13273872"/>
           <font name="OCR-A BT"/>
+          <foreground color="-1"/>
           <text value="Siguiente"/>
+        </properties>
+      </component>
+      <component id="2fbbc" class="javax.swing.JButton" binding="figthButton">
+        <constraints>
+          <grid row="12" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <background color="-3921882"/>
+          <font name="OCR-A BT"/>
+          <foreground color="-1"/>
+          <text value="Luchar"/>
         </properties>
       </component>
     </children>
