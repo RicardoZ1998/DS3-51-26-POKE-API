@@ -5,7 +5,7 @@ import model.Pokemon;
 public class Battle {
     private final Pokemon pokemonDelPrimerJugador;
     private final Pokemon pokemonDelSegundoJugador;
-    private static final double PROBABILIDAD_CRITICO = 0.0417; // 4.17 %
+    private static final double PROBABILIDAD_CRITICO = 0.10;
     private static final double MULTIPLICADOR_CRITICO = 1.5;
 
     private final BattleListener battleListener;
@@ -39,7 +39,7 @@ public class Battle {
         aplicarGolpe(pokemonAtacante, pokemonDefensor);
         if (pokemonDefensor.getCurrentHp() == 0) {
             combateTerminado = true;
-            battleListener.onBattleEnded(nombreParaMostrar(pokemonAtacante));
+            battleListener.onBattleEnded(pokemonAtacante.getName());
             return;
         }
 
@@ -60,35 +60,58 @@ public class Battle {
 
     private void aplicarGolpe(Pokemon pokemonAtacante, Pokemon pokemonDefensor) {
         boolean esCritico = Math.random() < PROBABILIDAD_CRITICO;
-        double modificador = esCritico ? MULTIPLICADOR_CRITICO : 1.0;
-        int dañoDelGolpe = calcularDañoDelGolpe(pokemonAtacante, pokemonDefensor, modificador);
+        double efectividad = calcularEfectividadDeTipos(pokemonAtacante.getType(), pokemonDefensor.getType());
+        int dañoDelGolpe = calcularDañoDelGolpe(pokemonAtacante, pokemonDefensor, esCritico, efectividad);
 
         pokemonDefensor.recibirDaño(dañoDelGolpe);
-        battleListener.onTurn(nombreParaMostrar(pokemonAtacante), nombreParaMostrar(pokemonDefensor), dañoDelGolpe, esCritico, modificador);
-        battleListener.onHpChanged(nombreParaMostrar(pokemonDefensor), pokemonDefensor.getCurrentHp());
+        battleListener.onTurn(
+                pokemonAtacante.getName(),
+                pokemonDefensor.getName(),
+                dañoDelGolpe,
+                esCritico,
+                efectividad
+        );
+        battleListener.onHpChanged(pokemonDefensor.getName(), pokemonDefensor.getCurrentHp());
     }
 
-    // Nombre con la primera letra en mayúscula. Si los dos Pokémon se llaman igual,
-    // se añade 1 o 2 según el jugador ("Pikachu 1", "Pikachu 2") para poder diferenciarlos en el log.
-    public String nombreParaMostrar(Pokemon pokemon) {
-        String nombre = pokemon.getName();
-        nombre = nombre.substring(0, 1).toUpperCase() + nombre.substring(1);
-        if (pokemonDelPrimerJugador.getName().equals(pokemonDelSegundoJugador.getName())) {
-            nombre += pokemon == pokemonDelPrimerJugador ? " 1" : " 2";
-        }
-        return nombre;
-    }
-
-    // daño = ataque * modificador * aleatorio(0 a 1) - defensa * aleatorio(0 a 1)
-    // El modificador es 1.5 si el golpe es crítico y 1.0 si no.
-    // Si el resultado es menor que 1, el golpe hace 1. La vida no baja de 0: lo hace recibirDaño
-    private int calcularDañoDelGolpe(Pokemon pokemonAtacante, Pokemon pokemonDefensor, double modificador) {
-        double dañoBase = pokemonAtacante.getAttack() * modificador * Math.random()
+    // daño = ataque * aleatorio(0 a 1) - defensa * aleatorio(0 a 1).
+    // Si es crítico (10 %), ese resultado se multiplica por 1.5.
+    // Después se multiplica por la efectividad del primer tipo: 1.3, 0.7 o 1.0.
+    // Si el resultado es menor que 1, el golpe hace 1. La vida no baja de 0: lo hace recibirDaño.
+    private int calcularDañoDelGolpe(Pokemon pokemonAtacante, Pokemon pokemonDefensor, boolean esCritico, double efectividad) {
+        double dañoBase = pokemonAtacante.getAttack() * Math.random()
                 - pokemonDefensor.getDefense() * Math.random();
+        if (esCritico) {
+            dañoBase = dañoBase * MULTIPLICADOR_CRITICO;
+        }
+        dañoBase = dañoBase * efectividad;
         int dañoDelGolpe = (int) Math.round(dañoBase);
         if (dañoDelGolpe < 1) {
             dañoDelGolpe = 1;
         }
         return dañoDelGolpe;
+    }
+
+    // Solo el primer tipo. Agua>Fuego, Fuego>Planta, Planta>Agua = 1.3. Al revés = 0.7. El resto = 1.0.
+    private double calcularEfectividadDeTipos(String tipoAtacante, String tipoDefensor) {
+        if (tipoAtacante.equals("water") && tipoDefensor.equals("fire")) {
+            return 1.3;
+        }
+        if (tipoAtacante.equals("fire") && tipoDefensor.equals("grass")) {
+            return 1.3;
+        }
+        if (tipoAtacante.equals("grass") && tipoDefensor.equals("water")) {
+            return 1.3;
+        }
+        if (tipoAtacante.equals("fire") && tipoDefensor.equals("water")) {
+            return 0.7;
+        }
+        if (tipoAtacante.equals("grass") && tipoDefensor.equals("fire")) {
+            return 0.7;
+        }
+        if (tipoAtacante.equals("water") && tipoDefensor.equals("grass")) {
+            return 0.7;
+        }
+        return 1.0;
     }
 }

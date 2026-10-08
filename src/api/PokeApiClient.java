@@ -5,8 +5,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -59,22 +57,14 @@ public class PokeApiClient {
         return buscarPokemonPorNombre(String.valueOf(id));
     }
 
-    // Descarga el sprite del Pokémon. Devuelve null si no se pudo descargar (URL inválida, sin red, etc.).
-    public BufferedImage descargarSprite(Pokemon pokemon) {
-        try {
-            return ImageIO.read(URI.create(pokemon.getSpriteUrl()).toURL());
-        } catch (IOException | IllegalArgumentException ex) {
-            return null;
-        }
-    }
-
     private Pokemon crearPokemonDesdeJson(JSONObject json) {
         String type = json.getJSONArray("types")
                 .getJSONObject(0)
                 .getJSONObject("type")
                 .getString("name");
 
-        String sprite = json.getJSONObject("sprites").getString("front_default");
+        JSONObject sprites = json.getJSONObject("sprites");
+        String sprite = sprites.isNull("front_default") ? null : sprites.getString("front_default");
 
         int hp = 0;
         int attack = 0;
