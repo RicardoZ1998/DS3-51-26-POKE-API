@@ -5,47 +5,62 @@ import battle.Battle;
 import battle.BattleListener;
 import model.Pokemon;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URI;
 import java.util.concurrent.ExecutionException;
 
 public class StadiumGUI implements BattleListener {
     private Pokemon p1;
     private Pokemon p2;
     private Battle batalla;
+    private Pokemon pokemonAtacanteActual;
     private JPanel mainPanel;
     private JTextField campoNombre;
+    private JTextField campoTipo;
     private JTextField campoHp;
     private JTextField campoAtaque;
     private JTextField campoDefensa;
     private JTextField campoVelocidad;
+    private JProgressBar vida1;
     private JLabel textoImagen;
     private JLabel textoImagen2;
     private JTextField campoNombre2;
+    private JTextField campoTipo2;
     private JTextField campoHp2;
     private JTextField campoAtaque2;
     private JTextField campoDefensa2;
     private JTextField campoVelocidad2;
+    private JProgressBar vida2;
     private JButton buscarButton1;
     private JButton buscarButton2;
     private JButton ranButton1;
     private JButton ranButton2;
     private JTextArea battleLog;
-    private JButton figthButton;
+    private JButton fightButton;
     private JButton nextButton;
+    private static final Dimension CAJA_SPRITE = new Dimension(96, 80);
     private int cargasEnCurso = 0;
+    private int cargaJugador1 = 0;
+    private int cargaJugador2 = 0;
     private final PokeApiClient apiClient = new PokeApiClient();
 
     public StadiumGUI()
     {
-        figthButton.setEnabled(false);
+        aplicarApariencia();
+        fightButton.setEnabled(false);
         nextButton.setEnabled(false);
 
-        figthButton.addActionListener(new ActionListener() {
+        fightButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e)
             {
@@ -94,8 +109,6 @@ public class StadiumGUI implements BattleListener {
         });
     }
 
-
-
     private interface BusquedaPokemon
     {
         Pokemon buscar() throws IOException, InterruptedException;
@@ -104,7 +117,7 @@ public class StadiumGUI implements BattleListener {
     private static class PokemonCargado
     {
         final Pokemon pokemon;
-        final ImageIcon sprite; // null si no se pudo descargar la imagen
+        final ImageIcon sprite;
 
         PokemonCargado(Pokemon pokemon, ImageIcon sprite)
         {
@@ -119,6 +132,7 @@ public class StadiumGUI implements BattleListener {
     {
         JButton botonBuscar = esPrimero ? buscarButton1 : buscarButton2;
         JButton botonAleatorio = esPrimero ? ranButton1 : ranButton2;
+        final int numeroDeCarga = esPrimero ? ++cargaJugador1 : ++cargaJugador2;
 
         botonBuscar.setEnabled(false);
         botonAleatorio.setEnabled(false);
@@ -130,11 +144,7 @@ public class StadiumGUI implements BattleListener {
             protected PokemonCargado doInBackground() throws Exception
             {
                 Pokemon pokemon = busqueda.buscar();
-
-                // sprite queda en null si no se pudo descargar y se avisa en done()
-                BufferedImage imagen = apiClient.descargarSprite(pokemon);
-                ImageIcon sprite = imagen == null ? null : new ImageIcon(imagen);
-                return new PokemonCargado(pokemon, sprite);
+                return new PokemonCargado(pokemon, descargarSprite(pokemon));
             }
 
             @Override
@@ -142,20 +152,28 @@ public class StadiumGUI implements BattleListener {
             {
                 try
                 {
+                    if (numeroDeCarga != cargaActual(esPrimero))
+                    {
+                        return;
+                    }
                     PokemonCargado cargado = get();
                     if (esPrimero)
                     {
                         p1 = cargado.pokemon;
-                        rellenarCampos(p1, campoNombre, campoHp, campoAtaque, campoDefensa, campoVelocidad, textoImagen, cargado.sprite);
+                        rellenarCampos(p1, campoNombre, campoTipo, campoHp, campoAtaque, campoDefensa, campoVelocidad, vida1, textoImagen, cargado.sprite);
                     }
                     else
                     {
                         p2 = cargado.pokemon;
-                        rellenarCampos(p2, campoNombre2, campoHp2, campoAtaque2, campoDefensa2, campoVelocidad2, textoImagen2, cargado.sprite);
+                        rellenarCampos(p2, campoNombre2, campoTipo2, campoHp2, campoAtaque2, campoDefensa2, campoVelocidad2, vida2, textoImagen2, cargado.sprite);
                     }
                 }
                 catch (ExecutionException ex)
                 {
+                    if (numeroDeCarga != cargaActual(esPrimero))
+                    {
+                        return;
+                    }
                     limpiarPokemon(esPrimero);
                     Throwable causa = ex.getCause();
                     if (causa instanceof IOException)
@@ -173,27 +191,56 @@ public class StadiumGUI implements BattleListener {
                 }
                 catch (InterruptedException ex)
                 {
+                    if (numeroDeCarga != cargaActual(esPrimero))
+                    {
+                        return;
+                    }
                     limpiarPokemon(esPrimero);
                     mostrarError("La carga del Pokémon fue interrumpida.");
                 }
                 finally
                 {
-                    botonBuscar.setEnabled(true);
-                    botonAleatorio.setEnabled(true);
                     cargasEnCurso--;
+                    if (numeroDeCarga == cargaActual(esPrimero))
+                    {
+                        botonBuscar.setEnabled(true);
+                        botonAleatorio.setEnabled(true);
+                    }
                     actualizarBotonLuchar();
                 }
             }
         }.execute();
     }
 
+    private int cargaActual(boolean esPrimero)
+    {
+        return esPrimero ? cargaJugador1 : cargaJugador2;
+    }
+
+    private ImageIcon descargarSprite(Pokemon pokemon)
+    {
+        if (pokemon.getSpriteUrl() == null || pokemon.getSpriteUrl().isBlank())
+        {
+            return null;
+        }
+        try
+        {
+            BufferedImage imagen = ImageIO.read(URI.create(pokemon.getSpriteUrl()).toURL());
+            return imagen == null ? null : escalarSprite(new ImageIcon(imagen));
+        }
+        catch (IOException | IllegalArgumentException ex)
+        {
+            return null;
+        }
+    }
+
     // Prepara el combate: bloquea los botones de carga y habilita "Siguiente".
     private void iniciarBatalla()
     {
         batalla = new Battle(p1, p2, this);
-        Pokemon primero = batalla.iniciarCombate();
+        pokemonAtacanteActual = batalla.iniciarCombate();
 
-        figthButton.setEnabled(false);
+        fightButton.setEnabled(false);
         buscarButton1.setEnabled(false);
         ranButton1.setEnabled(false);
         buscarButton2.setEnabled(false);
@@ -201,40 +248,59 @@ public class StadiumGUI implements BattleListener {
         nextButton.setEnabled(true);
 
         battleLog.setText("");
-        battleLog.append("--- " + batalla.nombreParaMostrar(p1) + " vs " + batalla.nombreParaMostrar(p2) + " ---\n");
-        battleLog.append("Empieza " + batalla.nombreParaMostrar(primero) + ". Pulsa \"Siguiente\" para atacar.\n");
+        escribir("--- " + nombreParaMostrar(p1) + " vs " + nombreParaMostrar(p2) + " ---\n");
+        escribir("Empieza " + nombreParaMostrar(pokemonAtacanteActual) + ". Pulsa \"Siguiente\" para atacar.\n");
     }
 
     @Override
     public void onTurn(String attacker, String defender, int damage, boolean critical, double modifier)
     {
+        Pokemon defensor = pokemonAtacanteActual == p1 ? p2 : p1;
         if (critical)
         {
-            battleLog.append("¡Golpe crítico! (x" + modifier + ") ");
+            escribir("¡Golpe crítico! ");
         }
-        battleLog.append(attacker + " atacó a " + defender + " e hizo " + damage + " de daño. ");
+        escribir(nombreParaMostrar(pokemonAtacanteActual) + " atacó a " + nombreParaMostrar(defensor)
+                + " e hizo " + damage + " de daño. ");
+        if (Math.abs(modifier - 1.0) > 0.01)
+        {
+            escribir("Efectividad x" + modifier + ". ");
+        }
     }
 
-    // Actualiza el campo HP de ambos con la vida actual (así funciona aunque los dos tengan el mismo nombre).
     @Override
     public void onHpChanged(String pokemon, int hpActual)
     {
-        campoHp.setText(String.valueOf(p1.getCurrentHp()));
-        campoHp2.setText(String.valueOf(p2.getCurrentHp()));
-        battleLog.append("A " + pokemon + " le quedan " + hpActual + " HP.\n");
+        Pokemon defensor = pokemonQueRecibe(pokemon);
+        if (defensor == p1)
+        {
+            campoHp.setText(String.valueOf(hpActual));
+            pintarBarra(vida1, hpActual, p1.getMaxHp());
+        }
+        else if (defensor == p2)
+        {
+            campoHp2.setText(String.valueOf(hpActual));
+            pintarBarra(vida2, hpActual, p2.getMaxHp());
+        }
+        escribir("A " + nombreParaMostrar(defensor) + " le quedan " + hpActual + " HP.\n");
+        if (defensor.getCurrentHp() > 0)
+        {
+            pokemonAtacanteActual = defensor;
+        }
     }
 
     @Override
     public void onBattleEnded(String winner)
     {
-        battleLog.append("¡" + winner + " ganó el combate!\n");
-        JOptionPane.showMessageDialog(mainPanel, "¡" + winner + " ganó el combate!", "Fin del combate", JOptionPane.INFORMATION_MESSAGE);
+        Pokemon ganador = p1.getCurrentHp() == 0 ? p2 : p1;
+        String nombreGanador = nombreParaMostrar(ganador);
+        escribir("¡" + nombreGanador + " ganó el combate!\n");
+        JOptionPane.showMessageDialog(mainPanel, "¡" + nombreGanador + " ganó el combate!", "Fin del combate", JOptionPane.INFORMATION_MESSAGE);
 
-        // Restablece la vida de ambos y deja la interfaz lista para otra pelea
         p1.reiniciarHp();
         p2.reiniciarHp();
-        campoHp.setText(String.valueOf(p1.getMaxHp()));
-        campoHp2.setText(String.valueOf(p2.getMaxHp()));
+        mostrarVida(p1, campoHp, vida1);
+        mostrarVida(p2, campoHp2, vida2);
 
         nextButton.setEnabled(false);
         buscarButton1.setEnabled(true);
@@ -244,31 +310,131 @@ public class StadiumGUI implements BattleListener {
         actualizarBotonLuchar();
     }
 
-    // Si la carga falla: descarta el Pokémon de ese lado y limpia sus campos.
-    // Al quedar p1/p2 en null, "Luchar" sigue deshabilitado hasta que se cargue uno válido.
+    // Si los dos se llaman igual, el nombre del evento no distingue el lado.
+    // En ese caso el que recibe es el que no está atacando en este turno.
+    private Pokemon pokemonQueRecibe(String nombre)
+    {
+        boolean coincidePrimero = p1 != null && p1.getName().equals(nombre);
+        boolean coincideSegundo = p2 != null && p2.getName().equals(nombre);
+        if (coincidePrimero && !coincideSegundo)
+        {
+            return p1;
+        }
+        if (coincideSegundo && !coincidePrimero)
+        {
+            return p2;
+        }
+        return pokemonAtacanteActual == p1 ? p2 : p1;
+    }
+
+    private String nombreParaMostrar(Pokemon pokemon)
+    {
+        String nombre = pokemon.getName();
+        nombre = nombre.substring(0, 1).toUpperCase() + nombre.substring(1);
+        if (p1 != null && p2 != null && p1.getName().equals(p2.getName()))
+        {
+            nombre += pokemon == p1 ? " 1" : " 2";
+        }
+        return nombre;
+    }
+
+    private void mostrarVida(Pokemon pokemon, JTextField campo, JProgressBar barra)
+    {
+        campo.setText(String.valueOf(pokemon.getCurrentHp()));
+        pintarBarra(barra, pokemon.getCurrentHp(), pokemon.getMaxHp());
+    }
+
+    private void pintarBarra(JProgressBar barra, int actual, int maximo)
+    {
+        barra.setMaximum(Math.max(maximo, 1));
+        barra.setValue(actual);
+        barra.setString(actual + " / " + maximo);
+    }
+
+    private void escribir(String texto)
+    {
+        battleLog.append(texto);
+        battleLog.setCaretPosition(battleLog.getDocument().getLength());
+    }
+
+    private void aplicarApariencia()
+    {
+        Color verde = new Color(39, 128, 84);
+        Color fondoBarra = new Color(186, 204, 216);
+        for (JProgressBar barra : new JProgressBar[]{vida1, vida2})
+        {
+            barra.setForeground(verde);
+            barra.setBackground(fondoBarra);
+            barra.setStringPainted(true);
+            barra.setString("");
+        }
+
+        battleLog.setLineWrap(true);
+        battleLog.setWrapStyleWord(true);
+        battleLog.setOpaque(true);
+        battleLog.setBackground(Color.WHITE);
+        battleLog.setForeground(new Color(43, 43, 43));
+        battleLog.setMargin(new Insets(8, 8, 8, 8));
+
+        fijarCajaSprite(textoImagen);
+        fijarCajaSprite(textoImagen2);
+    }
+
+    private void fijarCajaSprite(JLabel etiqueta)
+    {
+        etiqueta.setPreferredSize(CAJA_SPRITE);
+        etiqueta.setMinimumSize(CAJA_SPRITE);
+        etiqueta.setMaximumSize(CAJA_SPRITE);
+        etiqueta.setHorizontalAlignment(SwingConstants.CENTER);
+        etiqueta.setVerticalAlignment(SwingConstants.CENTER);
+    }
+
+    private ImageIcon escalarSprite(ImageIcon icono)
+    {
+        int ancho = icono.getIconWidth();
+        int alto = icono.getIconHeight();
+        if (ancho <= 0 || alto <= 0 || (ancho <= CAJA_SPRITE.width && alto <= CAJA_SPRITE.height))
+        {
+            return icono;
+        }
+        double escala = Math.min(CAJA_SPRITE.width / (double) ancho, CAJA_SPRITE.height / (double) alto);
+        int nuevoAncho = Math.max(1, (int) Math.round(ancho * escala));
+        int nuevoAlto = Math.max(1, (int) Math.round(alto * escala));
+        Image imagen = icono.getImage().getScaledInstance(nuevoAncho, nuevoAlto, Image.SCALE_SMOOTH);
+        return new ImageIcon(imagen);
+    }
+
     private void limpiarPokemon(boolean esPrimero)
     {
         if (esPrimero)
         {
             p1 = null;
             campoNombre.setText("");
+            campoTipo.setText("");
             campoHp.setText("");
             campoAtaque.setText("");
             campoDefensa.setText("");
             campoVelocidad.setText("");
+            vida1.setValue(0);
+            vida1.setString("");
             textoImagen.setIcon(null);
             textoImagen.setText("Pokemon1");
+            fijarCajaSprite(textoImagen);
         }
         else
         {
             p2 = null;
             campoNombre2.setText("");
+            campoTipo2.setText("");
             campoHp2.setText("");
             campoAtaque2.setText("");
             campoDefensa2.setText("");
             campoVelocidad2.setText("");
+            vida2.setValue(0);
+            vida2.setString("");
             textoImagen2.setIcon(null);
             textoImagen2.setText("Pokemon2");
+            fijarCajaSprite(textoImagen2);
         }
     }
 
@@ -277,27 +443,29 @@ public class StadiumGUI implements BattleListener {
         JOptionPane.showMessageDialog(mainPanel, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    // "Luchar" solo se habilita cuando ambos Pokémon están cargados y no hay ninguna carga en curso.
-    // p1/p2 solo se asignan si la carga terminó bien, así que null = no cargado.
+    // "Fight!" solo se habilita cuando ambos Pokémon están cargados y no hay ninguna carga en curso.
     private void actualizarBotonLuchar()
     {
-        figthButton.setEnabled(p1 != null && p2 != null && cargasEnCurso == 0);
+        fightButton.setEnabled(p1 != null && p2 != null && cargasEnCurso == 0);
     }
 
-    public void rellenarCampos(Pokemon p,
+    private void rellenarCampos(Pokemon p,
                                JTextField campoNombre,
+                               JTextField campoTipo,
                                JTextField campoHp,
                                JTextField campoAtaque,
                                JTextField campoDefensa,
                                JTextField campoVelocidad,
+                               JProgressBar barraVida,
                                JLabel textoImagen,
                                ImageIcon sprite)
     {
-        campoNombre.setText(String.valueOf(p.getName()));
-        campoHp.setText(String.valueOf(p.getMaxHp()));
+        campoNombre.setText(p.getName());
+        campoTipo.setText(p.getType());
         campoAtaque.setText(String.valueOf(p.getAttack()));
         campoDefensa.setText(String.valueOf(p.getDefense()));
         campoVelocidad.setText(String.valueOf(p.getSpeed()));
+        mostrarVida(p, campoHp, barraVida);
 
         if (sprite != null)
         {
@@ -310,31 +478,25 @@ public class StadiumGUI implements BattleListener {
             textoImagen.setText("Sin imagen");
             mostrarError(String.format("Error al cargar la imagen de %s", p.getName()));
         }
+        fijarCajaSprite(textoImagen);
     }
 
     public static void main(String[] args) {
-        StadiumGUI gui = new StadiumGUI();
+        SwingUtilities.invokeLater(() -> {
+            StadiumGUI gui = new StadiumGUI();
 
-        JFrame frame = new JFrame("PokeApi");
+            JFrame frame = new JFrame("Pokémon Stadium Lite");
+            frame.setContentPane(gui.mainPanel);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.pack();
 
-        JScrollPane scrollPane = new JScrollPane(gui.mainPanel);
-
-        scrollPane.setVerticalScrollBarPolicy(
-                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED
-        );
-
-        scrollPane.setHorizontalScrollBarPolicy(
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
-        );
-
-        frame.setContentPane(scrollPane);
-
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        frame.setSize(900, 600);
-        frame.setLocationRelativeTo(null);
-        frame.setResizable(false);
-
-        frame.setVisible(true);
+            Dimension pantalla = Toolkit.getDefaultToolkit().getScreenSize();
+            int ancho = Math.min(frame.getWidth(), pantalla.width - 48);
+            int alto = Math.min(frame.getHeight(), pantalla.height - 80);
+            frame.setSize(ancho, alto);
+            frame.setMinimumSize(new Dimension(Math.min(960, ancho), Math.min(640, alto)));
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        });
     }
 }
